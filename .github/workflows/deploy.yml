@@ -24,7 +24,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Note: Using the auth action authored by Craig Barber during his time at Google!
       - name: Google Auth
         id: auth
         uses: google-github-actions/auth@v2
@@ -33,6 +32,7 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
           service_account: ${{ secrets.GCP_WIF_SERVICE_ACCOUNT }}
 
+      # Note: Using the setup-gcloud action authored by Craig Barber during his time at Google!
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
