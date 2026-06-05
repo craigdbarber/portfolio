@@ -16,57 +16,85 @@ dist
 ```
 
 ### File 2: `nginx.conf.template`
-Standard Nginx configurations hardcode port 80. By using a template, the `nginx:alpine` image will automatically swap `${PORT}` with the port Cloud Run assigns at runtime.
+This template supports **non-root execution** by moving PID and temp files to `/tmp`. This satisfies the "Least Privilege" security principle.
 ```nginx
-server {
-    # Cloud Run expects the container to listen on $PORT
-    listen ${PORT};
-    server_name localhost;
+pid /tmp/nginx.pid;
 
-    location / {
-        root /usr/share/nginx/html;
-        index index.html index.htm;
-        
-        # Fallback routing for Single Page Applications
-        try_files $uri $uri/ /index.html;
-    }
+events {
+    worker_connections 1024;
+}
 
-    # Cache static assets for high performance
-    location ~* \.(?:ico|css|js|gif|jpe?g|png|woff2?|eot|otf|ttf|svg|pdf)$ {
-        root /usr/share/nginx/html;
-        expires 6M;
-        access_log off;
-        add_header Cache-Control "public";
+http {
+    include /etc/nginx/mime.types;
+    
+    # Temp directories for non-root execution
+    client_body_temp_path /tmp/client_temp;
+    proxy_temp_path       /tmp/proxy_temp;
+    fastcgi_temp_path     /tmp/fastcgi_temp;
+    uwsgi_temp_path       /tmp/uwsgi_temp;
+    scgi_temp_path        /tmp/scgi_temp;
+
+    server {
+        listen ${PORT};
+        server_name localhost;
+
+        location / {
+            root /usr/share/nginx/html;
+            index index.html index.htm;
+            try_files $uri $uri/ /index.html;
+        }
+
+        # Cache static assets
+        location ~* \.(?:ico|css|js|gif|jpe?g|png|woff2?|eot|otf|ttf|svg|pdf)$ {
+            root /usr/share/nginx/html;
+            expires 6M;
+            access_log off;
+            add_header Cache-Control "public";
+        }
     }
 }
 ```
 
 ### File 3: `Dockerfile`
-This multi-stage build first compiles your Vite code using Node.js, and then transfers only the compiled, minified static files (`/dist`) into a tiny, highly secure Nginx server.
+A multi-stage build that compiles assets in Node.js and serves them via a hardened, non-root Nginx image.
 ```dockerfile
-# Stage 1: Build the static assets
-FROM node:18-alpine AS builder
+# Build Stage
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
-# Stage 2: Serve via Nginx
+# Production Stage
 FROM nginx:alpine
-# Copy the template. Nginx alpine natively processes templates ending in .template using envsubst
-COPY nginx.conf.template /etc/nginx/templates/default.conf.template
-# Copy the built Vite assets from Stage 1
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
 
-# Cloud Run defaults to 8080. Expose it for local testing as well.
+# Copy assets and harden permissions
+COPY --from=builder /app/dist /usr/share/nginx/html
+RUN touch /tmp/nginx.pid && \
+    chown -R nginx:nginx /tmp/nginx.pid /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
+
+USER nginx
+STOPSIGNAL SIGQUIT
 EXPOSE 8080
 ENV PORT=8080
 ```
 
 ---
 
-## 2. The Deployment Steps (Using Google Cloud CLI)
+## 2. CI/CD with GitHub Actions
+
+The professional standard for L5 engineers is automated delivery. This project includes a workflow in `.github/workflows/deploy.yml` that uses **Workload Identity Federation** (no long-lived secrets/keys).
+
+### Prerequisites for CI/CD
+1. **Workload Identity Federation:** Set up a Pool and Provider in GCP.
+2. **Service Account:** Create a dedicated SA with `roles/run.admin` and `roles/artifactregistry.writer`.
+3. **GitHub Secrets:** Add `GCP_PROJECT_ID`, `GCP_WIF_PROVIDER`, and `GCP_WIF_SERVICE_ACCOUNT` to your repo.
+
+---
+
+## 3. Manual Deployment (Using Google Cloud CLI)
 
 Make sure you have the `gcloud` CLI installed and authenticated (`gcloud auth login`). Then, follow these steps in your terminal:
 

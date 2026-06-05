@@ -31,6 +31,15 @@ The portfolio is designed with a "Google-tier" aesthetic: clean, typography-driv
 - **Typography:** Inter (via Google Fonts)
 - **Linting:** [ESLint](https://eslint.org/) (JavaScript) and [HTMLHint](https://htmlhint.com/) (HTML)
 
+## Infrastructure (Cloud-Native)
+
+This project is architected for high reliability and security using modern GCP best practices:
+- **Compute:** [Google Cloud Run](https://cloud.google.com/run) (Serverless / Auto-scaling)
+- **Containerization:** Multi-stage Docker build with a **non-root Nginx** hardened runtime.
+- **CI/CD:** [GitHub Actions](https://github.com/features/actions) with **Workload Identity Federation** for secure, keyless authentication.
+- **Security:** Implements **Least Privilege** principles and graceful shutdown handling.
+- **Delivery:** Immutable infrastructure with automated rollouts.
+
 ## Project Structure
 
 ```text

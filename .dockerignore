@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.git
+.github
+README.md
+deployment.md
+*.log
