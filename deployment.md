@@ -79,10 +79,16 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:github-actions-deployer@$PROJECT_ID.iam.gserviceaccount.com" \
     --role="roles/storage.admin"
 
-# Grant access to view build logs
+# Grant access to view builds
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:github-actions-deployer@$PROJECT_ID.iam.gserviceaccount.com" \
     --role="roles/cloudbuild.builds.viewer"
+
+# Grant access to view build logs
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:github-actions-deployer@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/logging.viewer"
+
 ```
 
 #### 3. Create Workload Identity Pool and Provider
