@@ -1,6 +1,6 @@
 # Craig Barber | Professional Portfolio
 
-A high-performance, minimalist personal portfolio designed for technical recruiters and hiring managers. This site showcases the engineering career of Craig Barber, focusing on cloud infrastructure, developer tooling, and technical leadership.
+This project contains the code and deployment infrastructure for the website: [craigdbarber.net](https://craigdbarber.net). This site is a portfolio and professional profile for [Craig Barber](https://github.com/craigdbarber).
 
 ## Table of Contents
 
