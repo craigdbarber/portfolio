@@ -184,6 +184,11 @@
             <h3 class="font-bold text-gh-header mb-3">Google Kubernetes Engine (GKE) Plugin</h3>
             <p class="text-sm text-gh-text leading-relaxed mb-6">Automates the deployment of containerized build artifacts directly to GKE. Bridges Jenkins pipelines with Kubernetes orchestration using GCP's secure OAuth model.</p>
             
+            <!-- Architecture Diagram -->
+            <div class="mb-6 rounded-lg overflow-hidden border border-gh-border bg-gh-bg">
+              <img src="gke-plugin-arch.svg" alt="GKE Plugin Architecture" class="w-full h-auto opacity-90 hover:opacity-100 transition-opacity" />
+            </div>
+
             <div class="mb-6">
               <ul class="text-xs text-gh-text space-y-2">
                 <li><span class="text-gh-header font-medium">Key Technical Challenge:</span> Architected a secure, cross-service credential handover mechanism between Jenkins and GKE, leveraging GCP Service Accounts and Workload Identity.</li>

@@ -46,6 +46,7 @@ The following diagrams illustrate the design principles applied to this project:
 
 - **[Private Query Architecture](./public/private-query-arch.svg):** Demonstrates locally-hosted RAG platform design for data sovereignty.
 - **[Bazel Python Architecture](./public/bazel-python-arch.svg):** Shows the hermetic build pattern for Python microservices.
+- **[GKE Plugin Architecture](./public/gke-plugin-arch.svg):** Illustrates the secure orchestration flow from CI pipelines to Kubernetes.
 - **Deployment Flow:** See [deployment.md](./deployment.md) for the containerized delivery pipeline on GCP.
 
 ## Project Structure
