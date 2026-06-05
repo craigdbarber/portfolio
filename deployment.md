@@ -16,49 +16,41 @@ dist
 ```
 
 ### File 2: `nginx.conf.template`
-This template supports **non-root execution** by moving PID and temp files to `/tmp`. This satisfies the "Least Privilege" security principle.
+This template defines the **server block**. It is processed by `envsubst` and included in the main Nginx configuration.
 ```nginx
-pid /tmp/nginx.pid;
+server {
+    # Cloud Run expects the container to listen on $PORT
+    listen ${PORT};
+    server_name localhost;
 
-events {
-    worker_connections 1024;
-}
+    location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        
+        # Fallback routing for Single Page Applications
+        try_files $uri $uri/ /index.html;
+    }
 
-http {
-    include /etc/nginx/mime.types;
-    
-    # Temp directories for non-root execution
-    client_body_temp_path /tmp/client_temp;
-    proxy_temp_path       /tmp/proxy_temp;
-    fastcgi_temp_path     /tmp/fastcgi_temp;
-    uwsgi_temp_path       /tmp/uwsgi_temp;
-    scgi_temp_path        /tmp/scgi_temp;
+    # Cache static assets for high performance
+    location ~* \.(?:ico|css|js|gif|jpe?g|png|woff2?|eot|otf|ttf|svg|pdf)$ {
+        root /usr/share/nginx/html;
+        expires 6M;
+        access_log off;
+        add_header Cache-Control "public";
+    }
 
-    server {
-        listen ${PORT};
-        server_name localhost;
-
-        location / {
-            root /usr/share/nginx/html;
-            index index.html index.htm;
-            try_files $uri $uri/ /index.html;
-        }
-
-        # Cache static assets
-        location ~* \.(?:ico|css|js|gif|jpe?g|png|woff2?|eot|otf|ttf|svg|pdf)$ {
-            root /usr/share/nginx/html;
-            expires 6M;
-            access_log off;
-            add_header Cache-Control "public";
-        }
+    # Health check endpoint for Cloud Run/Load Balancers
+    location /healthz {
+        access_log off;
+        return 200 "OK";
     }
 }
 ```
 
 ### File 3: `Dockerfile`
-A multi-stage build that compiles assets in Node.js and serves them via a hardened, non-root Nginx image.
+A multi-stage build that compiles assets in Node.js and serves them via a hardened, non-root Nginx image. Note the surgical replacement of the main `nginx.conf` to support non-root paths.
 ```dockerfile
-# Build Stage
+# Stage 1: Build the static assets
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
@@ -66,17 +58,40 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Production Stage
+# Stage 2: Serve via Nginx (Non-Root for Security)
 FROM nginx:alpine
-COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
 
-# Copy assets and harden permissions
+# Copy the server template
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+
+# Create a hardened, non-root main Nginx configuration
+RUN rm /etc/nginx/nginx.conf && \
+    printf 'worker_processes auto;\n\
+pid /tmp/nginx.pid;\n\
+events { worker_connections 1024; }\n\
+http {\n\
+    include /etc/nginx/mime.types;\n\
+    client_body_temp_path /tmp/client_temp;\n\
+    proxy_temp_path       /tmp/proxy_temp;\n\
+    fastcgi_temp_path     /tmp/fastcgi_temp;\n\
+    uwsgi_temp_path       /tmp/uwsgi_temp;\n\
+    scgi_temp_path        /tmp/scgi_temp;\n\
+    include /etc/nginx/conf.d/*.conf;\n\
+}' > /etc/nginx/nginx.conf
+
+# Copy the built Vite assets from Stage 1
 COPY --from=builder /app/dist /usr/share/nginx/html
-RUN touch /tmp/nginx.pid && \
-    chown -R nginx:nginx /tmp/nginx.pid /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
+
+# Cloud Run best practice: SIGQUIT for graceful shutdown
+STOPSIGNAL SIGQUIT
+
+# Support non-root execution with correct permissions
+RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d && \
+    chmod -R 755 /usr/share/nginx/html && \
+    mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp && \
+    chown -R nginx:nginx /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp
 
 USER nginx
-STOPSIGNAL SIGQUIT
 EXPOSE 8080
 ENV PORT=8080
 ```
@@ -85,7 +100,7 @@ ENV PORT=8080
 
 ## 2. Local Verification (DevOps Best Practice)
 
-Before deploying to the cloud, a Senior engineer verifies the container locally to ensure the build and Nginx configuration are correct.
+Before deploying to the cloud verify the container locally to ensure the build and Nginx configuration are correct.
 
 **Build the image locally:**
 ```bash
