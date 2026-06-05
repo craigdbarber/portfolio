@@ -1,6 +1,6 @@
 # Craig Barber | Professional Portfolio
 
-A high-performance, minimalist personal portfolio designed for technical recruiters and hiring managers at Big Tech companies. This site showcases the engineering career of Craig Barber, focusing on cloud infrastructure, developer tooling, and technical leadership.
+A high-performance, minimalist personal portfolio designed for technical recruiters and hiring managers. This site showcases the engineering career of Craig Barber, focusing on cloud infrastructure, developer tooling, and technical leadership.
 
 ## Table of Contents
 
@@ -18,10 +18,6 @@ A high-performance, minimalist personal portfolio designed for technical recruit
 - [License](#license)
 
 ---
-
-## Overview
-
-The portfolio is designed with a "Google-tier" aesthetic: clean, typography-driven, and impact-focused. It utilizes the "XYZ Formula" to highlight measurable accomplishments, such as managing systems with 4 billion+ quarterly API requests and securing 220,000+ cloud VMs.
 
 ## Tech Stack
 
