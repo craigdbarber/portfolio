@@ -1,0 +1,59 @@
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#30363d" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" rx="12" fill="#0d1117" />
+  
+  <!-- Group: Jenkins Environment -->
+  <rect x="20" y="60" width="280" height="320" rx="8" fill="#161b22" stroke="#30363d" stroke-width="2" />
+  <text x="40" y="90" fill="#8b949e" font-family="sans-serif" font-size="14" font-weight="bold">JENKINS CI/CD HUB</text>
+
+  <!-- Component: Core Jenkins -->
+  <rect x="50" y="120" width="220" height="60" rx="4" fill="#0d1117" stroke="#30363d" />
+  <text x="160" y="155" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Jenkins Master / Controller</text>
+
+  <!-- Group: GCP Plugin Suite -->
+  <rect x="50" y="210" width="220" height="150" rx="4" fill="#0d1117" stroke="#58a6ff" stroke-width="2" />
+  <text x="160" y="235" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="12" font-weight="bold">GCP Plugin Suite</text>
+  
+  <text x="70" y="265" fill="#f0f6fc" font-family="sans-serif" font-size="10">• GCE Compute Plugin</text>
+  <text x="70" y="285" fill="#f0f6fc" font-family="sans-serif" font-size="10">• GCS Storage Plugin</text>
+  <text x="70" y="305" fill="#f0f6fc" font-family="sans-serif" font-size="10">• GCR/Artifact Registry</text>
+  <text x="70" y="325" fill="#f0f6fc" font-family="sans-serif" font-size="10">• Google OAuth &amp; IAM</text>
+  <text x="70" y="345" fill="#f0f6fc" font-family="sans-serif" font-size="10">• GKE Deployment</text>
+
+  <!-- Group: Google Cloud Platform -->
+  <rect x="340" y="60" width="440" height="320" rx="8" fill="#161b22" stroke="#30363d" stroke-width="2" />
+  <text x="360" y="90" fill="#8b949e" font-family="sans-serif" font-size="14" font-weight="bold">GOOGLE CLOUD PLATFORM SERVICES</text>
+
+  <!-- GCP Services -->
+  <rect x="370" y="110" width="180" height="50" rx="4" fill="#0d1117" stroke="#30363d" />
+  <text x="460" y="140" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Compute Engine (GCE)</text>
+
+  <rect x="570" y="110" width="180" height="50" rx="4" fill="#0d1117" stroke="#30363d" />
+  <text x="660" y="140" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Cloud Storage (GCS)</text>
+
+  <rect x="370" y="200" width="180" height="50" rx="4" fill="#0d1117" stroke="#30363d" />
+  <text x="460" y="230" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Artifact Registry</text>
+
+  <rect x="570" y="200" width="180" height="50" rx="4" fill="#0d1117" stroke="#30363d" />
+  <text x="660" y="230" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">IAM / OAuth 2.0</text>
+
+  <rect x="370" y="290" width="380" height="70" rx="4" fill="#0d1117" stroke="#30363d" />
+  <text x="560" y="330" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Kubernetes Engine (GKE)</text>
+
+  <!-- Arrows -->
+  <path d="M160,180 L160,210" stroke="#30363d" stroke-width="2" marker-end="url(#arrow-gray)" />
+  
+  <path d="M270,255 L370,135" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)" fill="none" />
+  <path d="M270,285 L570,135" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)" fill="none" />
+  <path d="M270,315 L370,225" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)" fill="none" />
+  <path d="M270,345 L370,315" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)" fill="none" />
+</svg>
