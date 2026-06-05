@@ -1,48 +1,30 @@
-# Non-root Nginx configuration for Cloud Run
-# Runs as 'nginx' user (UID 101) for enhanced security (Least Privilege)
+# Non-root Nginx server configuration for Cloud Run
+# This file is processed by envsubst and placed in /etc/nginx/conf.d/default.conf
 
-pid /tmp/nginx.pid;
+server {
+    # Cloud Run expects the container to listen on $PORT
+    listen ${PORT};
+    server_name localhost;
 
-events {
-    worker_connections 1024;
-}
+    location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        
+        # Fallback routing for Single Page Applications
+        try_files $uri $uri/ /index.html;
+    }
 
-http {
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
+    # Cache static assets for high performance
+    location ~* \.(?:ico|css|js|gif|jpe?g|png|woff2?|eot|otf|ttf|svg|pdf)$ {
+        root /usr/share/nginx/html;
+        expires 6M;
+        access_log off;
+        add_header Cache-Control "public";
+    }
 
-    # Temp directories for non-root execution
-    client_body_temp_path /tmp/client_temp;
-    proxy_temp_path       /tmp/proxy_temp;
-    fastcgi_temp_path     /tmp/fastcgi_temp;
-    uwsgi_temp_path       /tmp/uwsgi_temp;
-    scgi_temp_path        /tmp/scgi_temp;
-
-    server {
-        # Cloud Run expects the container to listen on $PORT
-        listen ${PORT};
-        server_name localhost;
-
-        location / {
-            root /usr/share/nginx/html;
-            index index.html index.htm;
-            
-            # Fallback routing for Single Page Applications
-            try_files $uri $uri/ /index.html;
-        }
-
-        # Cache static assets for high performance
-        location ~* \.(?:ico|css|js|gif|jpe?g|png|woff2?|eot|otf|ttf|svg|pdf)$ {
-            root /usr/share/nginx/html;
-            expires 6M;
-            access_log off;
-            add_header Cache-Control "public";
-        }
-
-        # Health check endpoint
-        location /healthz {
-            access_log off;
-            return 200 "OK";
-        }
+    # Health check endpoint
+    location /healthz {
+        access_log off;
+        return 200 "OK";
     }
 }

@@ -14,12 +14,23 @@ RUN npm run build
 # Stage 2: Serve via Nginx (Non-Root for Security)
 FROM nginx:alpine
 
-# Copy the non-root template
-COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
+# Copy the server template
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
-# Override the default Nginx config to use our custom one
-RUN rm /etc/nginx/conf.d/default.conf && \
-    sed -i 's|/etc/nginx/conf.d/\*.conf|/etc/nginx/nginx.conf|' /etc/nginx/nginx.conf
+# Create a hardened, non-root main Nginx configuration
+RUN rm /etc/nginx/nginx.conf && \
+    printf 'worker_processes auto;\n\
+pid /tmp/nginx.pid;\n\
+events { worker_connections 1024; }\n\
+http {\n\
+    include /etc/nginx/mime.types;\n\
+    client_body_temp_path /tmp/client_temp;\n\
+    proxy_temp_path       /tmp/proxy_temp;\n\
+    fastcgi_temp_path     /tmp/fastcgi_temp;\n\
+    uwsgi_temp_path       /tmp/uwsgi_temp;\n\
+    scgi_temp_path        /tmp/scgi_temp;\n\
+    include /etc/nginx/conf.d/*.conf;\n\
+}' > /etc/nginx/nginx.conf
 
 # Copy the built Vite assets from Stage 1
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -28,8 +39,10 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 STOPSIGNAL SIGQUIT
 
 # Support non-root execution
-RUN touch /tmp/nginx.pid && \
-    chown -R nginx:nginx /tmp/nginx.pid /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
+RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d && \
+    chmod -R 755 /usr/share/nginx/html && \
+    mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp && \
+    chown -R nginx:nginx /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp
 
 USER nginx
 
