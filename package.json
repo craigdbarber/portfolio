@@ -1,0 +1,27 @@
+{
+  "name": "craigdbarber",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "lint:js": "eslint .",
+    "lint:html": "htmlhint index.html",
+    "lint": "npm run lint:js && npm run lint:html",
+    "build": "npm run lint && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "autoprefixer": "^10.5.0",
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
+    "htmlhint": "^1.9.2",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^4.3.0",
+    "vite": "^8.0.12"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.0"
+  }
+}

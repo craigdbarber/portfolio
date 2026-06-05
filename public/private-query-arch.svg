@@ -1,0 +1,48 @@
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#30363d" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" rx="12" fill="#0d1117" />
+  
+  <!-- Group: Private Network -->
+  <rect x="20" y="60" width="760" height="320" rx="8" fill="#161b22" stroke="#30363d" stroke-width="2" />
+  <text x="40" y="90" fill="#8b949e" font-family="sans-serif" font-size="14" font-weight="bold">PRIVATE NETWORK / LOCAL HOST</text>
+
+  <!-- Component: Documents -->
+  <rect x="50" y="140" width="120" height="60" rx="4" fill="#0d1117" stroke="#30363d" />
+  <text x="110" y="175" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Local Docs</text>
+
+  <!-- Component: Multi-Worker Ingestion -->
+  <rect x="220" y="140" width="140" height="60" rx="4" fill="#238636" fill-opacity="0.1" stroke="#238636" />
+  <text x="290" y="175" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Parallel Ingestion</text>
+
+  <!-- Component: Vector DB (ChromaDB) -->
+  <rect x="410" y="140" width="140" height="60" rx="4" fill="#0d1117" stroke="#58a6ff" />
+  <text x="480" y="175" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">ChromaDB</text>
+
+  <!-- Component: Local LLM (Ollama) -->
+  <rect x="610" y="240" width="140" height="60" rx="4" fill="#0d1117" stroke="#58a6ff" />
+  <text x="680" y="275" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Ollama (LLM)</text>
+
+  <!-- Component: User Query -->
+  <rect x="50" y="240" width="120" height="60" rx="4" fill="#0d1117" stroke="#30363d" />
+  <text x="110" y="275" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">User Query</text>
+
+  <!-- Component: RAG Logic -->
+  <rect x="220" y="240" width="330" height="60" rx="4" fill="#0d1117" stroke="#30363d" />
+  <text x="385" y="275" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">RAG Context &amp; Citation Engine</text>
+
+  <!-- Arrows -->
+  <path d="M170,170 L220,170" stroke="#30363d" stroke-width="2" marker-end="url(#arrow-gray)" />
+  <path d="M360,170 L410,170" stroke="#30363d" stroke-width="2" marker-end="url(#arrow-gray)" />
+  <path d="M170,270 L220,270" stroke="#30363d" stroke-width="2" marker-end="url(#arrow-gray)" />
+  <path d="M480,200 L480,240" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)" />
+  <path d="M550,270 L610,270" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)" />
+</svg>

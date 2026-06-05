@@ -1,0 +1,47 @@
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#30363d" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#238636" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" rx="12" fill="#0d1117" />
+  
+  <!-- Group: Bazel Workspace -->
+  <rect x="20" y="60" width="760" height="320" rx="8" fill="#161b22" stroke="#30363d" stroke-width="2" />
+  <text x="40" y="90" fill="#8b949e" font-family="sans-serif" font-size="14" font-weight="bold">HERMETIC BAZEL WORKSPACE (BZLMOD)</text>
+
+  <!-- Component: Dependency Resolution (uv) -->
+  <rect x="50" y="140" width="160" height="60" rx="4" fill="#0d1117" stroke="#58a6ff" />
+  <text x="130" y="175" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">uv Dependency Res</text>
+
+  <!-- Component: Hermetic Toolchain -->
+  <rect x="250" y="140" width="160" height="60" rx="4" fill="#0d1117" stroke="#30363d" />
+  <text x="330" y="175" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Python 3.14 Toolchain</text>
+
+  <!-- Component: Build/Test Graph -->
+  <rect x="450" y="140" width="300" height="60" rx="4" fill="#238636" fill-opacity="0.1" stroke="#238636" />
+  <text x="600" y="175" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Action Graph (Caching / Incremental)</text>
+
+  <!-- Component: Static Analysis (Ruff, Ty, Bandit) -->
+  <rect x="50" y="260" width="360" height="60" rx="4" fill="#0d1117" stroke="#30363d" />
+  <text x="230" y="295" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Analysis Toolchain: Ruff • Ty • Bandit</text>
+
+  <!-- Component: Validated Artifacts -->
+  <rect x="450" y="260" width="300" height="60" rx="4" fill="#0d1117" stroke="#58a6ff" />
+  <text x="600" y="295" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Verified Production Artifacts</text>
+
+  <!-- Arrows -->
+  <path d="M210,170 L250,170" stroke="#30363d" stroke-width="2" marker-end="url(#arrow-gray)" />
+  <path d="M410,170 L450,170" stroke="#30363d" stroke-width="2" marker-end="url(#arrow-gray)" />
+  <path d="M230,200 L230,260" stroke="#30363d" stroke-width="2" marker-end="url(#arrow-gray)" />
+  <path d="M410,290 L450,290" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)" />
+  <path d="M600,200 L600,260" stroke="#238636" stroke-width="2" marker-end="url(#arrow-green)" />
+</svg>
