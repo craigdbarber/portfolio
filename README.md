@@ -141,4 +141,4 @@ The primary content resides in `index.html`. It is structured into semantic sect
 
 ## License
 
-This project is private and intended for personal portfolio use.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
