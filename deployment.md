@@ -73,6 +73,11 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:github-actions-deployer@$PROJECT_ID.iam.gserviceaccount.com" \
   --role="roles/serviceusage.serviceUsageConsumer"
+
+# Grant Storage access to upload code
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:github-actions-deployer@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/storage.admin"
 ```
 
 #### 3. Create Workload Identity Pool and Provider
