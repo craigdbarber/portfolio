@@ -2,105 +2,19 @@
 
 This document outlines the strategy for deploying the static Vite portfolio to Google Cloud Platform (GCP) using a containerized approach (Cloud Run). This strategy balances low cost (leveraging the massive Cloud Run free tier) with professional engineering signals (demonstrating containerization and immutable infrastructure).
 
-## 1. The Configuration Files
+## 1. Core Configuration Files
 
-Create these three files in the root of your project:
+This project uses a containerized architecture optimized for security and performance. The primary configuration files are:
 
-### File 1: `.dockerignore`
-This ensures you don't upload your massive local `node_modules` folder to GCP, drastically speeding up the build.
-```text
-node_modules
-dist
-.env
-.git
-```
-
-### File 2: `nginx.conf.template`
-This template defines the **server block**. It is processed by `envsubst` and included in the main Nginx configuration.
-```nginx
-server {
-    # Cloud Run expects the container to listen on $PORT
-    listen ${PORT};
-    server_name localhost;
-
-    location / {
-        root /usr/share/nginx/html;
-        index index.html index.htm;
-        
-        # Fallback routing for Single Page Applications
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Cache static assets for high performance
-    location ~* \.(?:ico|css|js|gif|jpe?g|png|woff2?|eot|otf|ttf|svg|pdf)$ {
-        root /usr/share/nginx/html;
-        expires 6M;
-        access_log off;
-        add_header Cache-Control "public";
-    }
-
-    # Health check endpoint for Cloud Run/Load Balancers
-    location /healthz {
-        access_log off;
-        return 200 "OK";
-    }
-}
-```
-
-### File 3: `Dockerfile`
-A multi-stage build that compiles assets in Node.js and serves them via a hardened, non-root Nginx image. Note the surgical replacement of the main `nginx.conf` to support non-root paths.
-```dockerfile
-# Stage 1: Build the static assets
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-# Stage 2: Serve via Nginx (Non-Root for Security)
-FROM nginx:alpine
-
-# Copy the server template
-COPY nginx.conf.template /etc/nginx/templates/default.conf.template
-
-# Create a hardened, non-root main Nginx configuration
-RUN rm /etc/nginx/nginx.conf && \
-    printf 'worker_processes auto;\n\
-pid /tmp/nginx.pid;\n\
-events { worker_connections 1024; }\n\
-http {\n\
-    include /etc/nginx/mime.types;\n\
-    client_body_temp_path /tmp/client_temp;\n\
-    proxy_temp_path       /tmp/proxy_temp;\n\
-    fastcgi_temp_path     /tmp/fastcgi_temp;\n\
-    uwsgi_temp_path       /tmp/uwsgi_temp;\n\
-    scgi_temp_path        /tmp/scgi_temp;\n\
-    include /etc/nginx/conf.d/*.conf;\n\
-}' > /etc/nginx/nginx.conf
-
-# Copy the built Vite assets from Stage 1
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Cloud Run best practice: SIGQUIT for graceful shutdown
-STOPSIGNAL SIGQUIT
-
-# Support non-root execution with correct permissions
-RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d && \
-    chmod -R 755 /usr/share/nginx/html && \
-    mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp && \
-    chown -R nginx:nginx /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp
-
-USER nginx
-EXPOSE 8080
-ENV PORT=8080
-```
+*   **[.dockerignore](./.dockerignore):** Ensures local artifacts (like `node_modules`) aren't uploaded to the cloud, speeding up builds.
+*   **[nginx.conf.template](./nginx.conf.template):** A dynamic Nginx server block that supports the `$PORT` variable injected by Cloud Run.
+*   **[Dockerfile](./Dockerfile):** A multi-stage build that compiles assets and serves them via a hardened, non-root Nginx runtime.
 
 ---
 
 ## 2. Local Verification (DevOps Best Practice)
 
-Before deploying to the cloud verify the container locally to ensure the build and Nginx configuration are correct.
+Before deploying to the cloud, a Senior engineer verifies the container locally to ensure the build and Nginx configuration are correct.
 
 **Build the image locally:**
 ```bash
@@ -259,7 +173,7 @@ Firebase Hosting can act as a global CDN and SSL termination point for Cloud Run
 
 ---
 
-## 4. Cost Analysis
+## 6. Cost Analysis
 
 Because we limited the memory to `256Mi` and `max-instances` to 2, this configuration ensures you stay well within the generous GCP Free Tier.
 
