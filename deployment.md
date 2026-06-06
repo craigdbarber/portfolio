@@ -6,7 +6,7 @@ This document outlines the strategy for deploying the static Vite website to Goo
 
 - [Core Configuration Files](#core-configuration-files)
 - [Local Verification](#local-verification)
-- [CD with GitHub Actions](#cd-with-github-actions)
+- [CI/CD with GitHub Actions](#cicd-with-github-actions)
 - [Manual Deployment](#manual-deployment)
 - [Custom Domain Configuration](#custom-domain-configuration)
 - [Cost Analysis](#cost-analysis)
@@ -20,6 +20,7 @@ This project uses a containerized architecture optimized for security and perfor
 *   **[.dockerignore](./.dockerignore):** Ensures local artifacts (like `node_modules`) aren't uploaded to the cloud, speeding up builds.
 *   **[nginx.conf.template](./nginx.conf.template):** A dynamic Nginx server block that supports the `$PORT` variable injected by Cloud Run.
 *   **[Dockerfile](./Dockerfile):** A multi-stage build that compiles assets and serves them via a hardened, non-root Nginx runtime.
+*   **[package.json](./package.json):** Defines project dependencies and scripts.
 
 ---
 
@@ -42,9 +43,9 @@ The container includes a dedicated health check endpoint. You can verify the ser
 
 ---
 
-## CD with GitHub Actions
+## CI/CD with GitHub Actions
 
-This project includes a workflow in `.github/workflows/deploy.yml` that uses **Workload Identity Federation (WIF)**. This allows GitHub to authenticate with GCP without the need for long-lived Service Account JSON keys.
+This project includes a workflow in [deploy.yml](./.github/workflows/deploy.yml) that uses **Workload Identity Federation (WIF)**. This allows GitHub to authenticate with GCP without the need for long-lived Service Account JSON keys.
 
 ### Configuring Workload Identity Federation (Step-by-Step)
 
@@ -108,16 +109,15 @@ gcloud iam workload-identity-pools providers create-oidc "github-provider" \
   --workload-identity-pool="github-pool" \
   --display-name="GitHub Actions Provider" \
   --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository" \
-  --attribute-condition="assertion.repository_owner == 'YOUR_ORG'" \
+  --attribute-condition="assertion.repository_owner == 'craigdbarber'" \
   --issuer-uri="https://token.actions.githubusercontent.com"
 ```
 
 #### Bind the GitHub Repo to the Service Account
-This is the most critical security step. Replace `YOUR_ORG/YOUR_REPO` with your actual GitHub path (e.g., `craigdbarber/portfolio`).
 ```bash
 gcloud iam service-accounts add-iam-policy-binding "github-actions-deployer@$PROJECT_ID.iam.gserviceaccount.com" \
   --role="roles/iam.workloadIdentityUser" \
-  --member="principalSet://iam.googleapis.com/${POOL_ID}/attribute.repository/YOUR_ORG/YOUR_REPO"
+  --member="principalSet://iam.googleapis.com/${POOL_ID}/attribute.repository/craigdbarber/portfolio"
 ```
 
 #### Add GitHub Secrets
@@ -174,8 +174,6 @@ gcloud run deploy portfolio-web \
 ---
 
 ## Custom Domain Configuration
-
-Once your service is live, you'll likely want to point a custom domain (e.g., `craigdbarber.net`) to it. GCP provides two main ways to do this:
 
 ### Cloud Run Domain Mapping
 
