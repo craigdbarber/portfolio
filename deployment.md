@@ -21,6 +21,7 @@ This project uses a containerized architecture optimized for security and perfor
 *   **[nginx.conf.template](./nginx.conf.template):** A dynamic Nginx server block that supports the `$PORT` variable injected by Cloud Run.
 *   **[Dockerfile](./Dockerfile):** A multi-stage build that compiles assets and serves them via a hardened, non-root Nginx runtime.
 *   **[package.json](./package.json):** Defines project dependencies and scripts.
+*   **[artifact-policy.json](./artifact-policy):** Defines the docker image retention policy for the gcloud artifacts repository.
 
 ---
 
@@ -155,13 +156,21 @@ gcloud artifacts repositories create $REPO_NAME \
   --description="Docker repository for personal portfolio"
 ```
 
-**Step 4: Build using Cloud Build**
+**Step 4: Define the Artifacts Retention Policy**
+```bash
+gcloud artifacts repositories set-cleanup-policies $REPO_NAME \
+    --location=$REGION \
+    --policy=artifact-policy.json \
+    --no-dry-run
+```
+
+**Step 5: Build using Cloud Build**
 ```bash
 gcloud builds submit \
   --tag $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:latest
 ```
 
-**Step 5: Deploy to Cloud Run**
+**Step 6: Deploy to Cloud Run**
 ```bash
 gcloud run deploy portfolio-web \
   --image $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:latest \
