@@ -1,8 +1,19 @@
 # GCP Cloud Run Deployment Strategy
 
-This document outlines the strategy for deploying the static Vite portfolio to Google Cloud Platform (GCP) using a containerized approach (Cloud Run). This strategy balances low cost (leveraging the massive Cloud Run free tier) with professional engineering signals (demonstrating containerization and immutable infrastructure).
+This document outlines the strategy for deploying the static Vite website to Google Cloud Platform (GCP) using a containerized approach (Cloud Run).
 
-## 1. Core Configuration Files
+## Table of Contents
+
+- [Core Configuration Files](#core-configuration-files)
+- [Local Verification](#local-verification)
+- [CD with GitHub Actions](#cd-with-github-actions)
+- [Manual Deployment](#manual-deployment)
+- [Custom Domain Configuration](#custom-domain-configuration)
+- [Cost Analysis](#cost-analysis)
+
+---
+
+## Core Configuration Files
 
 This project uses a containerized architecture optimized for security and performance. The primary configuration files are:
 
@@ -12,9 +23,9 @@ This project uses a containerized architecture optimized for security and perfor
 
 ---
 
-## 2. Local Verification (DevOps Best Practice)
+## Local Verification
 
-Before deploying to the cloud, a Senior engineer verifies the container locally to ensure the build and Nginx configuration are correct.
+Before deploying to the cloud verify the container locally to ensure the build and Nginx configuration are correct.
 
 **Build the image locally:**
 ```bash
@@ -31,22 +42,22 @@ The container includes a dedicated health check endpoint. You can verify the ser
 
 ---
 
-## 3. CI/CD with GitHub Actions
+## CD with GitHub Actions
 
-The professional standard for L5 engineers is automated delivery. This project includes a workflow in `.github/workflows/deploy.yml` that uses **Workload Identity Federation (WIF)**. This allows GitHub to authenticate with GCP without the need for long-lived Service Account JSON keys.
+This project includes a workflow in `.github/workflows/deploy.yml` that uses **Workload Identity Federation (WIF)**. This allows GitHub to authenticate with GCP without the need for long-lived Service Account JSON keys.
 
 ### Configuring Workload Identity Federation (Step-by-Step)
 
 Follow these steps to authorize your GitHub repository to deploy to your GCP project:
 
-#### 1. Create a Service Account
+#### Create a Service Account
 Create a dedicated service account that the GitHub Actions workflow will "impersonate."
 ```bash
 gcloud iam service-accounts create "github-actions-deployer" \
   --display-name="GitHub Actions Deployer"
 ```
 
-#### 2. Grant Necessary Roles
+#### Grant Necessary Roles
 Assign roles to the service account so it can build images and deploy to Cloud Run.
 ```bash
 # Grant Cloud Run Admin
@@ -78,19 +89,9 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:github-actions-deployer@$PROJECT_ID.iam.gserviceaccount.com" \
     --role="roles/storage.admin"
-
-# Grant access to view builds
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:github-actions-deployer@$PROJECT_ID.iam.gserviceaccount.com" \
-    --role="roles/cloudbuild.builds.viewer"
-
-# Grant access to view build logs
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:github-actions-deployer@$PROJECT_ID.iam.gserviceaccount.com" \
-    --role="roles/logging.viewer"
 ```
 
-#### 3. Create Workload Identity Pool and Provider
+#### Create Workload Identity Pool and Provider
 ```bash
 # Create the Pool
 gcloud iam workload-identity-pools create "github-pool" \
@@ -107,11 +108,11 @@ gcloud iam workload-identity-pools providers create-oidc "github-provider" \
   --workload-identity-pool="github-pool" \
   --display-name="GitHub Actions Provider" \
   --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository" \
-  --attribute-condition="assertion.repository_owner == 'craigdbarber'" \
+  --attribute-condition="assertion.repository_owner == 'YOUR_ORG'" \
   --issuer-uri="https://token.actions.githubusercontent.com"
 ```
 
-#### 4. Bind the GitHub Repo to the Service Account
+#### Bind the GitHub Repo to the Service Account
 This is the most critical security step. Replace `YOUR_ORG/YOUR_REPO` with your actual GitHub path (e.g., `craigdbarber/portfolio`).
 ```bash
 gcloud iam service-accounts add-iam-policy-binding "github-actions-deployer@$PROJECT_ID.iam.gserviceaccount.com" \
@@ -119,7 +120,7 @@ gcloud iam service-accounts add-iam-policy-binding "github-actions-deployer@$PRO
   --member="principalSet://iam.googleapis.com/${POOL_ID}/attribute.repository/YOUR_ORG/YOUR_REPO"
 ```
 
-#### 5. Add GitHub Secrets
+#### Add GitHub Secrets
 In your GitHub repository, go to **Settings > Secrets and variables > Actions** and add:
 - `GCP_PROJECT_ID`: Your project ID.
 - `GCP_WIF_PROVIDER`: The full path to the provider (format: `projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github-pool/providers/github-provider`).
@@ -127,7 +128,7 @@ In your GitHub repository, go to **Settings > Secrets and variables > Actions** 
 
 ---
 
-## 4. Manual Deployment (Using Google Cloud CLI)
+## Manual Deployment
 
 While CI/CD is preferred, you can deploy manually using these steps:
 
@@ -172,12 +173,11 @@ gcloud run deploy portfolio-web \
 
 ---
 
-## 5. Custom Domain Configuration
+## Custom Domain Configuration
 
-Once your service is live, you'll likely want to point a custom domain (e.g., `craigdbarber.com`) to it. GCP provides two main ways to do this:
+Once your service is live, you'll likely want to point a custom domain (e.g., `craigdbarber.net`) to it. GCP provides two main ways to do this:
 
-### Option A: Cloud Run Domain Mapping (Easiest)
-*Note: This feature is in "Limited Preview" and is only available in specific regions.*
+### Cloud Run Domain Mapping
 
 1. In the GCP Console, go to **Cloud Run** > **Manage Custom Domains**.
 2. Click **Add Mapping**.
@@ -185,16 +185,9 @@ Once your service is live, you'll likely want to point a custom domain (e.g., `c
 4. Update your DNS provider (e.g., Namecheap, Google Domains, Cloudflare) with the **CNAME** or **A** records provided by GCP.
 5. GCP will automatically provision and renew an SSL certificate for you.
 
-### Option B: Firebase Hosting as a Proxy (Recommended for Free Tier SSL)
-Firebase Hosting can act as a global CDN and SSL termination point for Cloud Run.
-
-1. Initialize Firebase in your project: `firebase init hosting`.
-2. Select "Configure as a rewrites to Cloud Run".
-3. Point your domain to Firebase. This gives you global edge caching and free SSL without the "Load Balancer tax" mentioned earlier.
-
 ---
 
-## 6. Cost Analysis
+## Cost Analysis
 
 Because we limited the memory to `256Mi` and `max-instances` to 2, this configuration ensures you stay well within the generous GCP Free Tier.
 
