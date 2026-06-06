@@ -3,7 +3,8 @@
     "name": "delete-old-images",
     "action": { "type": "Delete" },
     "condition": {
-      "tagState": "ANY"
+      "tagState": "ANY",
+      "olderThan": "7d"
     }
   },
   {
