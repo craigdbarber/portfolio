@@ -9,7 +9,7 @@ This project contains the code and deployment infrastructure for the website: [c
 - [Infrastructure](#infrastructure)
 - [Deployment](#deployment)
 - [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
+- [Setup](#setup)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Development](#development)
@@ -56,7 +56,7 @@ This project is architected for high reliability and security using modern GCP b
 └── vite.config.js       # Vite configuration
 ```
 
-## Getting Started
+## Setup
 
 ### Prerequisites
 

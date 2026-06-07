@@ -6,6 +6,7 @@ This document outlines the strategy for deploying the static Vite website to Goo
 
 - [Core Configuration Files](#core-configuration-files)
 - [Local Verification](#local-verification)
+- [GCP Initial Setup](#gcp-initial-setup)
 - [CI/CD with GitHub Actions](#cicd-with-github-actions)
 - [Manual Deployment](#manual-deployment)
 - [Custom Domain Configuration](#custom-domain-configuration)
@@ -27,8 +28,6 @@ This project uses a containerized architecture optimized for security and perfor
 
 ## Local Verification
 
-Before deploying to the cloud verify the container locally to ensure the build and Nginx configuration are correct.
-
 **Build the image locally:**
 ```bash
 docker build -t portfolio:local .
@@ -43,6 +42,40 @@ docker run -p 8080:8080 portfolio:local
 The container includes a dedicated health check endpoint. You can verify the server is ready by visiting `http://localhost:8080/healthz`.
 
 ---
+
+## GCP Initial Setup
+
+**Step 1: Set Environment Variables**
+```bash
+export PROJECT_ID="your-gcp-project-id"
+export REGION="us-central1"
+export REPO_NAME="portfolio-repo"
+export IMAGE_NAME="web"
+export SERVICE_NAME="portfolio-web"
+
+gcloud config set project $PROJECT_ID
+```
+
+**Step 2: Enable Required APIs**
+```bash
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com
+```
+
+**Step 3: Create an Artifact Registry Repository**
+```bash
+gcloud artifacts repositories create $REPO_NAME \
+  --repository-format=docker \
+  --location=$REGION \
+  --description="Docker repository for personal portfolio"
+```
+
+**Step 4: Define the Artifacts Retention Policy**
+```bash
+gcloud artifacts repositories set-cleanup-policies $REPO_NAME \
+    --location=$REGION \
+    --policy=artifact-policy.json \
+    --no-dry-run
+```
 
 ## CI/CD with GitHub Actions
 
@@ -131,46 +164,13 @@ In your GitHub repository, go to **Settings > Secrets and variables > Actions** 
 
 ## Manual Deployment
 
-While CI/CD is preferred, you can deploy manually using these steps:
-
-**Step 1: Set Environment Variables**
-```bash
-export PROJECT_ID="your-gcp-project-id"
-export REGION="us-central1"
-export REPO_NAME="portfolio-repo"
-export IMAGE_NAME="web"
-
-gcloud config set project $PROJECT_ID
-```
-
-**Step 2: Enable Required APIs**
-```bash
-gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com
-```
-
-**Step 3: Create an Artifact Registry Repository**
-```bash
-gcloud artifacts repositories create $REPO_NAME \
-  --repository-format=docker \
-  --location=$REGION \
-  --description="Docker repository for personal portfolio"
-```
-
-**Step 4: Define the Artifacts Retention Policy**
-```bash
-gcloud artifacts repositories set-cleanup-policies $REPO_NAME \
-    --location=$REGION \
-    --policy=artifact-policy.json \
-    --no-dry-run
-```
-
-**Step 5: Build using Cloud Build**
+**Build using Cloud Build**
 ```bash
 gcloud builds submit \
   --tag $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:latest
 ```
 
-**Step 6: Deploy to Cloud Run**
+**Deploy to Cloud Run**
 ```bash
 gcloud run deploy portfolio-web \
   --image $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:latest \
@@ -182,21 +182,31 @@ gcloud run deploy portfolio-web \
 
 ---
 
-## Custom Domain Configuration
+## Cloud Run Domain Mapping
 
-### Cloud Run Domain Mapping
+**Check existing verified domains**
+```bash
+gcloud domains list-user-verified
+```
 
-1. In the GCP Console, go to **Cloud Run** > **Manage Custom Domains**.
-2. Click **Add Mapping**.
-3. Select your service (`portfolio-web`) and enter your domain name.
-4. Update your DNS provider (e.g., Namecheap, Google Domains, Cloudflare) with the **CNAME** or **A** records provided by GCP.
-5. GCP will automatically provision and renew an SSL certificate for you.
+**Initiate verification for a new domain**
+```bash
+gcloud domains verify example.com
+```
+
+**Create the Domain Mapping**
+```bash
+gcloud beta run domain-mappings create \
+  --service $SERVICE_NAME \
+  --domain example.com \
+  --region $REGION
+```
 
 ---
 
 ## Cost Analysis
 
-Because we limited the memory to `256Mi` and `max-instances` to 2, this configuration ensures you stay well within the generous GCP Free Tier.
+Because we limited the memory to `256Mi` and `max-instances` to 2, this configuration ensures staying well within the GCP Free Tier.
 
 - **Cloud Run:** Free for the first 2 million requests and 360,000 GB-seconds per month. (Estimated Cost: $0.00/mo).
 - **Artifact Registry:** $0.10 per GB per month. A lightweight Nginx Alpine image is ~20MB. (Estimated Cost: ~$0.01/mo).
