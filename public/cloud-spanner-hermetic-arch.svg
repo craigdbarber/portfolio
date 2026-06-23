@@ -1,0 +1,70 @@
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#30363d"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#238636"/>
+    </marker>
+  </defs>
+  <!-- Background -->
+  <rect width="800" height="400" rx="12" fill="#0d1117"/>
+  
+  <!-- Left Side: Local / CI Context -->
+  <rect x="20" y="60" width="360" height="320" rx="8" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+  <text x="40" y="90" fill="#8b949e" font-family="sans-serif" font-size="14" font-weight="bold">TEST RUNNER (CI / LOCAL)</text>
+  
+  <!-- Go Test Suite -->
+  <rect x="50" y="110" width="300" height="60" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="200" y="145" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Go Test Suite (Parallel Runners)</text>
+  
+  <!-- os/exec Process Manager -->
+  <rect x="50" y="190" width="300" height="60" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="200" y="225" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Go Subprocess Manager (os/exec)</text>
+  
+  <!-- Unique DB Provisioner -->
+  <rect x="50" y="270" width="300" height="90" rx="4" fill="#238636" fill-opacity="0.1" stroke="#238636"/>
+  <text x="200" y="295" text-anchor="middle" fill="#238636" font-family="sans-serif" font-size="12" font-weight="bold">Dynamic DB Provisioner</text>
+  <text x="200" y="315" text-anchor="middle" fill="#8b949e" font-family="sans-serif" font-size="10">Creates random databases in emulator</text>
+  <text x="200" y="335" text-anchor="middle" fill="#8b949e" font-family="sans-serif" font-size="10">Applies migrations &amp; isolates test runs</text>
+  
+  <!-- Right Side: Docker / Emulator Context -->
+  <rect x="420" y="60" width="360" height="320" rx="8" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+  <text x="440" y="90" fill="#8b949e" font-family="sans-serif" font-size="14" font-weight="bold">EPHEMERAL EMULATOR (DOCKER)</text>
+  
+  <!-- Spanner Emulator -->
+  <rect x="450" y="110" width="300" height="100" rx="4" fill="#0d1117" stroke="#58a6ff" stroke-width="2"/>
+  <text x="600" y="145" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="12" font-weight="bold">Cloud Spanner Emulator Container</text>
+  <text x="600" y="175" text-anchor="middle" fill="#8b949e" font-family="sans-serif" font-size="10">In-memory • Port 9010</text>
+  
+  <!-- Databases -->
+  <rect x="450" y="240" width="300" height="120" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="600" y="265" text-anchor="middle" fill="#f0f6fc" font-family="sans-serif" font-size="12">Isolated Databases (In-Memory)</text>
+  <!-- Databases subboxes -->
+  <rect x="470" y="285" width="70" height="50" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="505" y="315" text-anchor="middle" fill="#8b949e" font-family="sans-serif" font-size="10">db_01ff</text>
+  
+  <rect x="565" y="285" width="70" height="50" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="600" y="315" text-anchor="middle" fill="#8b949e" font-family="sans-serif" font-size="10">db_ae88</text>
+  
+  <rect x="660" y="285" width="70" height="50" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="695" y="315" text-anchor="middle" fill="#8b949e" font-family="sans-serif" font-size="10">db_cd42</text>
+  
+  <!-- Connections -->
+  <!-- A to B (Runner starts testcontainers) -->
+  <path d="M200,170 L200,190" stroke="#30363d" stroke-width="2" marker-end="url(#arrow-gray)"/>
+  <!-- B to C (Testcontainers spins up Spanner Emulator Container) -->
+  <path d="M350,220 C380,220 380,170 440,170" fill="none" stroke="#30363d" stroke-width="2" marker-end="url(#arrow-gray)"/>
+  <!-- B to D (Go Test Suite uses DB Provisioner) -->
+  <path d="M200,250 L200,270" stroke="#30363d" stroke-width="2" marker-end="url(#arrow-gray)"/>
+  <!-- D to C (DB Provisioner creates databases on Emulator) -->
+  <path d="M350,315 L440,310" fill="none" stroke="#238636" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <!-- DBs are hosted in the emulator container -->
+  <path d="M600,210 L600,240" stroke="#30363d" stroke-width="2" marker-end="url(#arrow-gray)"/>
+  <!-- Go Test Client query using SPANNER_EMULATOR_HOST -->
+  <path d="M350,140 L440,140" fill="none" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="395" y="132" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="8" font-weight="bold">HOST ENV</text>
+</svg>

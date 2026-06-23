@@ -165,6 +165,28 @@
             </div>
           </div>
 
+          <!-- Cloud Spanner Hermetic Testing -->
+          <div class="p-8 border border-gh-border rounded-md hover:bg-gh-surface transition-all">
+            <h3 class="font-bold text-gh-header mb-3">Cloud Spanner Hermetic Testing</h3>
+            <p class="text-sm text-gh-text leading-relaxed mb-6">A lightweight testing framework and integration template for hermetic, database-isolated integration testing with Google Cloud Spanner. Orchestrates the Spanner Emulator and dynamic Instance/Database provisoning in Go to run parallel tests locally and in CI/CD pipelines.</p>
+            
+            <!-- Architecture Diagram -->
+            <div class="mb-6 rounded-lg overflow-hidden border border-gh-border bg-gh-bg">
+              <img src="cloud-spanner-hermetic-arch.svg" alt="Cloud Spanner Hermetic Testing Architecture" class="w-full h-auto opacity-90 hover:opacity-100 transition-opacity" />
+            </div>
+
+            <div class="mb-6">
+              <ul class="text-xs text-gh-text space-y-2">
+                <li><span class="text-gh-header font-medium">Key Technical Challenge:</span> Bypassed the database provisioning bottleneck by implementing a dynamic database-per-test lifecycle manager, achieving sub-second schema setup and cleanups for high-throughput parallel test execution.</li>
+              </ul>
+            </div>
+
+            <div class="flex gap-4">
+              <a href="https://github.com/craigdbarber/cloud-spanner-hermetic-testing" class="text-sm font-semibold text-gh-blue hover:underline">View Source &rarr;</a>
+              <span class="text-xs text-slate-600 px-2 py-1 bg-slate-900 rounded border border-gh-border">Go • GCP • Docker • os/exec</span>
+            </div>
+          </div>
+
           <div class="p-8 border border-gh-border rounded-md hover:bg-gh-surface transition-all">
             <h3 class="font-bold text-gh-header mb-3">GCP Jenkins Integrations</h3>
             <p class="text-sm text-gh-text leading-relaxed mb-6">Official plugins for GCE, GCS, OAuth, GCR, and GKE. The primary bridge for CI/CD users on Google Cloud.</p>
